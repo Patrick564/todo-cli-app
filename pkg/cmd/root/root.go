@@ -3,11 +3,10 @@ package root
 import (
 	"os"
 
+	listCmd "github.com/Patrick564/todo-cli-app/pkg/cmd/list"
 	versionCmd "github.com/Patrick564/todo-cli-app/pkg/cmd/version"
 	"github.com/spf13/cobra"
 )
-
-// var version = "0.1.0"
 
 func NewCmdRoot() *cobra.Command {
 	cmd := &cobra.Command{
@@ -16,17 +15,20 @@ func NewCmdRoot() *cobra.Command {
 		Long:  "Todo: under construction",
 
 		Example: `
+			$ gtask list completed
 			$ gtask add -f your_task
+			$ gtask remove id_task
 		`,
 	}
 
 	cmd.Flags().Bool("version", false, "Show gtask version")
 	cmd.SetHelpFunc(func(c *cobra.Command, args []string) {
-		rootHelp(os.Stdout)
+		rootHelp(os.Stdout, c)
 	})
 
 	// Child commands
 	cmd.AddCommand(versionCmd.NewCmdVersion(os.Stdout))
+	cmd.AddCommand(listCmd.NewCmdList())
 
 	return cmd
 }
