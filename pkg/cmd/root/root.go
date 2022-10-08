@@ -10,14 +10,13 @@ import (
 
 func NewCmdRoot() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "gtask",
+		Use:   "gtask <command> <subcommand>",
 		Short: "A simple CLI task manager",
 		Long:  "Todo: under construction",
 
-		Example: `
-			$ gtask list completed
-			$ gtask add -f your_task
-			$ gtask remove id_task
+		Example: `  $ gtask list completed
+  $ gtask add -f your_task
+  $ gtask remove id_task
 		`,
 	}
 

@@ -11,10 +11,9 @@ func NewCmdList() *cobra.Command {
 		Use:   "list <command>",
 		Short: "List all tasks",
 		Long:  `Todo list`,
-		Example: `
-			$ gtask list all
-			$ gtask list completed
-			$ gtask list pending
+		Example: `  $ gtask list all
+  $ gtask list completed
+  $ gtask list pending
 		`,
 	}
 
