@@ -14,7 +14,7 @@ func NewCmdVersion(w io.Writer) *cobra.Command {
 		Use:    "version",
 		Hidden: true,
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Fprintln(w, version)
+			fmt.Fprintf(w, "gtaks version %s\n", version)
 		},
 	}
 
