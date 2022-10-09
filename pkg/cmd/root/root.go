@@ -5,6 +5,7 @@ import (
 
 	addCmd "github.com/Patrick564/todo-cli-app/pkg/cmd/add"
 	listCmd "github.com/Patrick564/todo-cli-app/pkg/cmd/list"
+	removeCmd "github.com/Patrick564/todo-cli-app/pkg/cmd/remove"
 	versionCmd "github.com/Patrick564/todo-cli-app/pkg/cmd/version"
 	"github.com/spf13/cobra"
 )
@@ -30,6 +31,7 @@ func NewCmdRoot() *cobra.Command {
 	cmd.AddCommand(versionCmd.NewCmdVersion(os.Stdout))
 	cmd.AddCommand(listCmd.NewCmdList())
 	cmd.AddCommand(addCmd.NewCmdAdd())
+	cmd.AddCommand(removeCmd.NewCmdRemove())
 
 	return cmd
 }
