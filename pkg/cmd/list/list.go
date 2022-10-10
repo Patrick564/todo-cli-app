@@ -26,14 +26,17 @@ func NewCmdList() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			if All {
 				fmt.Println("List of all tasks")
+				return
 			}
 
 			if Completed {
 				fmt.Println("List of completed tasks")
+				return
 			}
 
 			if Pending {
 				fmt.Println("List of pending tasks")
+				return
 			}
 
 			cmd.Help()
