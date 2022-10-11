@@ -36,8 +36,12 @@ func NewCmdList() *cobra.Command {
 
 		Run: func(cmd *cobra.Command, args []string) {
 			if All {
-				content, _ := readTasksFromFile(os.DirFS(tasksDir))
-				fmt.Printf("content: \n%s", content)
+				tasks, _ := readTasksFromFile(os.DirFS(tasksDir))
+
+				fmt.Println()
+				for _, t := range tasks {
+					fmt.Printf("%s: %s\n", t.Id, t.Content)
+				}
 
 				return
 			}
@@ -69,38 +73,35 @@ func readTasksFromFile(fileSystem fs.FS) ([]Task, error) {
 		return nil, err
 	}
 
-	var tasks []Task
-
-	for _, f := range dir {
-		task, err := getTask(fileSystem, f)
-		if err != nil {
-			return nil, err
-		}
-
-		tasks = append(tasks, task)
+	task, err := getTask(fileSystem, dir[0])
+	if err != nil {
+		return nil, err
 	}
 
-	return tasks, nil
+	return task, nil
 }
 
-func getTask(fileSystem fs.FS, f fs.DirEntry) (Task, error) {
+// TODO: just open a file, change name to something more descriptive
+func getTask(fileSystem fs.FS, f fs.DirEntry) ([]Task, error) {
 	postFile, err := fileSystem.Open(f.Name())
 	if err != nil {
-		return Task{}, err
+		return nil, err
 	}
 	defer postFile.Close()
 
 	return newTask(postFile)
 }
 
-func newTask(postBody io.Reader) (Task, error) {
+// TODO: same, change name to some more descriptive
+func newTask(postBody io.Reader) ([]Task, error) {
 	scanner := bufio.NewScanner(postBody)
 
-	scanner.Scan()
-	line := scanner.Text()
+	var tasks []Task
 
-	return Task{
-		Id:      line[:1],
-		Content: line[3:],
-	}, nil
+	for scanner.Scan() {
+		task := scanner.Text()
+		tasks = append(tasks, Task{Id: task[:1], Content: task[3:]})
+	}
+
+	return tasks, nil
 }

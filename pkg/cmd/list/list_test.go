@@ -6,10 +6,13 @@ import (
 	"testing/fstest"
 )
 
+// TODO: add table test for list all, completed, and pending
 func TestList(t *testing.T) {
 	fs := fstest.MapFS{
-		"all.md": {Data: []byte(`1. example first task
-2. example second task`)},
+		"all.md": {Data: []byte(`1. fake task example
+5. second fake task
+13. two digits id fake task
+`)},
 	}
 
 	task, err := readTasksFromFile(fs)
@@ -19,8 +22,9 @@ func TestList(t *testing.T) {
 
 	got := task
 	want := []Task{
-		{Id: "1", Content: "example first task"},
-		{Id: "2", Content: "example second task"},
+		{Id: "1", Content: "fake task example"},
+		{Id: "5", Content: "second fake task"},
+		{Id: "13", Content: "two digits id fake task"},
 	}
 
 	if !reflect.DeepEqual(got, want) {
