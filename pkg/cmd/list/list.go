@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -99,8 +100,8 @@ func newTask(postBody io.Reader) ([]Task, error) {
 	var tasks []Task
 
 	for scanner.Scan() {
-		task := scanner.Text()
-		tasks = append(tasks, Task{Id: task[:1], Content: task[3:]})
+		task := strings.Split(scanner.Text(), ". ")
+		tasks = append(tasks, Task{Id: task[0], Content: task[1]})
 	}
 
 	return tasks, nil
