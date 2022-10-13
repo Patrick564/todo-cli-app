@@ -16,11 +16,16 @@ func TestList(t *testing.T) {
 		wantErr error
 	}{
 		{
-			name: "empty tasks file",
-			flag: "all.md",
-			file: fstest.MapFS{
-				"all.md": {Data: []byte("")},
-			},
+			name:    "empty files dir",
+			flag:    "all.md",
+			file:    fstest.MapFS{},
+			want:    nil,
+			wantErr: ErrFileNotFound,
+		},
+		{
+			name:    "empty tasks file",
+			flag:    "all.md",
+			file:    fstest.MapFS{"all.md": {Data: []byte("")}},
 			want:    nil,
 			wantErr: ErrFileEmpty,
 		},
