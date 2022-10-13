@@ -18,7 +18,7 @@ func main() {
 	code := 0
 
 	if err := rootCmd.Execute(); err != nil {
-		code = 1
+		code = 0
 	}
 
 	os.Exit(code)

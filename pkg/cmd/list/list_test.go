@@ -9,11 +9,21 @@ import (
 // TODO: add table test for list all, completed, and pending
 func TestList(t *testing.T) {
 	cases := []struct {
-		name string
-		flag string
-		file fstest.MapFS
-		want []Task
+		name    string
+		flag    string
+		file    fstest.MapFS
+		want    []Task
+		wantErr error
 	}{
+		{
+			name: "empty tasks file",
+			flag: "all.md",
+			file: fstest.MapFS{
+				"all.md": {Data: []byte("")},
+			},
+			want:    nil,
+			wantErr: ErrFileEmpty,
+		},
 		{
 			name: "all.md file with 3 tasks",
 			flag: "all.md",
@@ -44,12 +54,26 @@ func TestList(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			got, err := readTasksFromFS(c.file, c.flag)
 			if err != nil {
-				t.Fatal(err)
+				assertError(t, err, c.wantErr)
 			}
 
-			if !reflect.DeepEqual(got, c.want) {
-				t.Errorf("want %s but got %s", c.want, got)
-			}
+			assertDeepEqual(t, got, c.want)
 		})
+	}
+}
+
+func assertError(t testing.TB, got, want error) {
+	t.Helper()
+
+	if got != want {
+		t.Errorf("want error '%+v' but got '%+v'", want, got)
+	}
+}
+
+func assertDeepEqual(t testing.TB, got, want []Task) {
+	t.Helper()
+
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("want %+v but got %+v", want, got)
 	}
 }

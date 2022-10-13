@@ -11,7 +11,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Correct to uppercase
 const tasksDir = "gtask_backup"
+
+var (
+	ErrFileNotFound = errors.New("not found file with tasks")
+	ErrFileEmpty    = errors.New("not found any task in file")
+)
 
 type Task struct {
 	Id      string
@@ -104,7 +110,7 @@ func getTasksFile(dir []fs.DirEntry, flag string) (fs.DirEntry, error) {
 		}
 	}
 
-	return nil, errors.New("tasks not found")
+	return nil, ErrFileNotFound
 }
 
 func getTasks(fileSystem fs.FS, f fs.DirEntry) ([]Task, error) {
@@ -125,6 +131,10 @@ func newTasks(postFile fs.File) ([]Task, error) {
 	for scanner.Scan() {
 		task := strings.Split(scanner.Text(), ". ")
 		tasks = append(tasks, Task{Id: task[0], Content: task[1]})
+	}
+
+	if tasks == nil {
+		return nil, ErrFileEmpty
 	}
 
 	return tasks, nil
