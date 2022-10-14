@@ -46,15 +46,15 @@ func NewCmdList() *cobra.Command {
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if opts.Completed {
-				opts.Name = "completed.md"
+				opts.Name = "completed"
 			}
 
 			if opts.Pending {
-				opts.Name = "pending.md"
+				opts.Name = "pending"
 			}
 
 			if opts.All || opts.Name == "" {
-				opts.Name = "all.md"
+				opts.Name = "all"
 			}
 
 			return runList(opts.Name)
@@ -71,6 +71,18 @@ func NewCmdList() *cobra.Command {
 func runList(flag string) error {
 	tasks, err := readTasksFromFS(os.DirFS(tasksDir), flag)
 	if err != nil {
+		if err == ErrFileEmpty {
+			fmt.Printf("No %s tasks found.\n", flag)
+
+			return nil
+		}
+
+		if err == ErrFileNotFound {
+			fmt.Printf("File for %s tasks not found.\n", flag)
+
+			return nil
+		}
+
 		return err
 	}
 
@@ -104,8 +116,10 @@ func readTasksFromFS(fileSystem fs.FS, flag string) ([]Task, error) {
 }
 
 func getTasksFile(dir []fs.DirEntry, flag string) (fs.DirEntry, error) {
+	cmdFlag := fmt.Sprintf("%s.md", flag)
+
 	for _, d := range dir {
-		if flag == d.Name() {
+		if cmdFlag == d.Name() {
 			return d, nil
 		}
 	}

@@ -17,21 +17,21 @@ func TestList(t *testing.T) {
 	}{
 		{
 			name:    "empty files dir",
-			flag:    "all.md",
+			flag:    "all",
 			file:    fstest.MapFS{},
 			want:    nil,
 			wantErr: ErrFileNotFound,
 		},
 		{
 			name:    "empty tasks file",
-			flag:    "all.md",
+			flag:    "all",
 			file:    fstest.MapFS{"all.md": {Data: []byte("")}},
 			want:    nil,
 			wantErr: ErrFileEmpty,
 		},
 		{
 			name: "all.md file with 3 tasks",
-			flag: "all.md",
+			flag: "all",
 			file: fstest.MapFS{
 				"all.md": {Data: []byte("1. fake task example\n5. second fake task\n13. two digits id fake task")},
 			},
@@ -43,7 +43,7 @@ func TestList(t *testing.T) {
 		},
 		{
 			name: "all.md and completed.md file with 2 tasks",
-			flag: "completed.md",
+			flag: "completed",
 			file: fstest.MapFS{
 				"all.md":       {Data: []byte("15. fake task")},
 				"completed.md": {Data: []byte("12. completed fake task\n28. second completed fake task")},
