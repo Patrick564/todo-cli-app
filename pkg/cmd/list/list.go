@@ -1,28 +1,16 @@
 package list
 
 import (
-	"bufio"
-	"errors"
 	"fmt"
 	"io/fs"
 	"os"
-	"strings"
 
+	"github.com/Patrick564/todo-cli-app/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 
 // Correct to uppercase
 const tasksDir = "gtask_backup"
-
-var (
-	ErrFileNotFound = errors.New("not found file with tasks")
-	ErrFileEmpty    = errors.New("not found any task in file")
-)
-
-type Task struct {
-	Id      string
-	Content string
-}
 
 type ListOptions struct {
 	All       bool
@@ -71,15 +59,13 @@ func NewCmdList() *cobra.Command {
 func runList(flag string) error {
 	tasks, err := readTasksFromFS(os.DirFS(tasksDir), flag)
 	if err != nil {
-		if err == ErrFileEmpty {
+		if err == cmdutil.ErrFileEmpty {
 			fmt.Printf("No %s tasks found.\n", flag)
-
 			return nil
 		}
 
-		if err == ErrFileNotFound {
+		if err == cmdutil.ErrFileNotFound {
 			fmt.Printf("File for %s tasks not found.\n", flag)
-
 			return nil
 		}
 
@@ -96,13 +82,13 @@ func runList(flag string) error {
 	return nil
 }
 
-func readTasksFromFS(fileSystem fs.FS, flag string) ([]Task, error) {
+func readTasksFromFS(fileSystem fs.FS, flag string) ([]cmdutil.Task, error) {
 	dir, err := fs.ReadDir(fileSystem, ".")
 	if err != nil {
 		return nil, err
 	}
 
-	entry, err := getTasksFile(dir, flag)
+	entry, err := cmdutil.GetFile(dir, flag)
 	if err != nil {
 		return nil, err
 	}
@@ -115,41 +101,12 @@ func readTasksFromFS(fileSystem fs.FS, flag string) ([]Task, error) {
 	return task, nil
 }
 
-func getTasksFile(dir []fs.DirEntry, flag string) (fs.DirEntry, error) {
-	cmdFlag := fmt.Sprintf("%s.md", flag)
-
-	for _, d := range dir {
-		if cmdFlag == d.Name() {
-			return d, nil
-		}
-	}
-
-	return nil, ErrFileNotFound
-}
-
-func getTasks(fileSystem fs.FS, f fs.DirEntry) ([]Task, error) {
+func getTasks(fileSystem fs.FS, f fs.DirEntry) ([]cmdutil.Task, error) {
 	postFile, err := fileSystem.Open(f.Name())
 	if err != nil {
 		return nil, err
 	}
 	defer postFile.Close()
 
-	return newTasks(postFile)
-}
-
-func newTasks(postFile fs.File) ([]Task, error) {
-	scanner := bufio.NewScanner(postFile)
-
-	var tasks []Task
-
-	for scanner.Scan() {
-		task := strings.Split(scanner.Text(), ". ")
-		tasks = append(tasks, Task{Id: task[0], Content: task[1]})
-	}
-
-	if tasks == nil {
-		return nil, ErrFileEmpty
-	}
-
-	return tasks, nil
+	return cmdutil.GetFileContent(postFile)
 }

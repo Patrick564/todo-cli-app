@@ -4,6 +4,8 @@ import (
 	"reflect"
 	"testing"
 	"testing/fstest"
+
+	"github.com/Patrick564/todo-cli-app/pkg/cmdutil"
 )
 
 // TODO: add table test for list all, completed, and pending
@@ -12,7 +14,7 @@ func TestList(t *testing.T) {
 		name    string
 		flag    string
 		file    fstest.MapFS
-		want    []Task
+		want    []cmdutil.Task
 		wantErr error
 	}{
 		{
@@ -20,14 +22,14 @@ func TestList(t *testing.T) {
 			flag:    "all",
 			file:    fstest.MapFS{},
 			want:    nil,
-			wantErr: ErrFileNotFound,
+			wantErr: cmdutil.ErrFileNotFound,
 		},
 		{
 			name:    "empty tasks file",
 			flag:    "all",
 			file:    fstest.MapFS{"all.md": {Data: []byte("")}},
 			want:    nil,
-			wantErr: ErrFileEmpty,
+			wantErr: cmdutil.ErrFileEmpty,
 		},
 		{
 			name: "all.md file with 3 tasks",
@@ -35,7 +37,7 @@ func TestList(t *testing.T) {
 			file: fstest.MapFS{
 				"all.md": {Data: []byte("1. fake task example\n5. second fake task\n13. two digits id fake task")},
 			},
-			want: []Task{
+			want: []cmdutil.Task{
 				{Id: "1", Content: "fake task example"},
 				{Id: "5", Content: "second fake task"},
 				{Id: "13", Content: "two digits id fake task"},
@@ -48,7 +50,7 @@ func TestList(t *testing.T) {
 				"all.md":       {Data: []byte("15. fake task")},
 				"completed.md": {Data: []byte("12. completed fake task\n28. second completed fake task")},
 			},
-			want: []Task{
+			want: []cmdutil.Task{
 				{Id: "12", Content: "completed fake task"},
 				{Id: "28", Content: "second completed fake task"},
 			},
@@ -75,7 +77,7 @@ func assertError(t testing.TB, got, want error) {
 	}
 }
 
-func assertDeepEqual(t testing.TB, got, want []Task) {
+func assertDeepEqual(t testing.TB, got, want []cmdutil.Task) {
 	t.Helper()
 
 	if !reflect.DeepEqual(got, want) {
