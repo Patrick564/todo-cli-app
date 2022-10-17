@@ -17,7 +17,7 @@ type Task struct {
 }
 
 func (t *Task) ToString() string {
-	return fmt.Sprintf("%s. %s", t.Id, t.Content)
+	return fmt.Sprintf("%s: %s", t.Id, t.Content)
 }
 
 func New(content string) *Task {

@@ -73,40 +73,26 @@ func runList(opts ListOptions) error {
 		return err
 	}
 
-	for idx, t := range tasks {
-		if idx == 0 {
-			fmt.Println()
+	return listTasks(tasks, opts.Verbose)
+}
+
+func listTasks(tasks []cmdutil.Task, v bool) error {
+	format := func(t cmdutil.Task, v bool) string {
+		if v {
+			return fmt.Sprintf("%s: %s", t.Id, t.Content)
 		}
 
-		if opts.Verbose {
-			fmt.Printf("%s: %s\n", t.Id, t.Content)
-		} else {
-			fmt.Printf("%s: %s\n", t.Id, t.Content)
-		}
+		return fmt.Sprint(t.Content)
+	}
+
+	fmt.Println()
+
+	for _, t := range tasks {
+		fmt.Println(format(t, v))
 	}
 
 	return nil
 }
-
-// func listTasks(tasks []cmdutil.Task, verbose bool) {
-// 	fmt.Println()
-
-// 	format := func(t cmdutil.Task, v bool) string {
-// 		if v {
-// 			return fmt.Sprintf("%s: %s\n", t.Id, t.Content)
-// 		}
-
-// 		return fmt.Sprintf("%s\n", t.Content)
-// 	}
-
-// 	for _, t := range tasks {
-// 		if v {
-// 			fmt.Printf("%s: %s\n", t.Id, t.Content)
-// 		} else {
-// 			fmt.Printf("%s: %s\n", t.Id, t.Content)
-// 		}
-// 	}
-// }
 
 func readTasksFromFS(fileSystem fs.FS, flag string) ([]cmdutil.Task, error) {
 	dir, err := fs.ReadDir(fileSystem, ".")
