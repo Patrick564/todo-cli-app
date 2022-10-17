@@ -15,6 +15,7 @@ type ListOptions struct {
 	All       bool
 	Completed bool
 	Pending   bool
+	Verbose   bool
 	Name      string
 }
 
@@ -44,19 +45,20 @@ func NewCmdList() *cobra.Command {
 				opts.Name = "all"
 			}
 
-			return runList(opts.Name)
+			return runList(opts)
 		},
 	}
 
 	cmd.PersistentFlags().BoolVarP(&opts.All, "all", "a", false, "List all tasks")
 	cmd.PersistentFlags().BoolVarP(&opts.Completed, "completed", "c", false, "List completed tasks")
 	cmd.PersistentFlags().BoolVarP(&opts.Pending, "pending", "p", false, "List pending tasks")
+	cmd.PersistentFlags().BoolVarP(&opts.Verbose, "verbose", "v", false, "List tasks with all information")
 
 	return cmd
 }
 
-func runList(flag string) error {
-	tasks, err := readTasksFromFS(os.DirFS(cmdutil.TasksDir), flag)
+func runList(opts ListOptions) error {
+	tasks, err := readTasksFromFS(os.DirFS(cmdutil.TasksDir), opts.Name)
 	if err != nil {
 		if err == cmdutil.ErrFileEmpty {
 			fmt.Println("No tasks found.")
@@ -64,7 +66,7 @@ func runList(flag string) error {
 		}
 
 		if err == cmdutil.ErrFileNotFound {
-			fmt.Printf("File for %s tasks not found.\n", flag)
+			fmt.Printf("File for %s tasks not found.\n", opts.Name)
 			return nil
 		}
 
@@ -75,11 +77,36 @@ func runList(flag string) error {
 		if idx == 0 {
 			fmt.Println()
 		}
-		fmt.Printf("%s: %s\n", t.Id, t.Content)
+
+		if opts.Verbose {
+			fmt.Printf("%s: %s\n", t.Id, t.Content)
+		} else {
+			fmt.Printf("%s: %s\n", t.Id, t.Content)
+		}
 	}
 
 	return nil
 }
+
+// func listTasks(tasks []cmdutil.Task, verbose bool) {
+// 	fmt.Println()
+
+// 	format := func(t cmdutil.Task, v bool) string {
+// 		if v {
+// 			return fmt.Sprintf("%s: %s\n", t.Id, t.Content)
+// 		}
+
+// 		return fmt.Sprintf("%s\n", t.Content)
+// 	}
+
+// 	for _, t := range tasks {
+// 		if v {
+// 			fmt.Printf("%s: %s\n", t.Id, t.Content)
+// 		} else {
+// 			fmt.Printf("%s: %s\n", t.Id, t.Content)
+// 		}
+// 	}
+// }
 
 func readTasksFromFS(fileSystem fs.FS, flag string) ([]cmdutil.Task, error) {
 	dir, err := fs.ReadDir(fileSystem, ".")
@@ -128,7 +155,7 @@ func getFileContent(postFile fs.File) ([]cmdutil.Task, error) {
 	var tasks []cmdutil.Task
 
 	for scanner.Scan() {
-		task := strings.Split(scanner.Text(), ". ")
+		task := strings.Split(scanner.Text(), ": ")
 
 		if len(task) == 0 {
 			return nil, cmdutil.ErrEmptyLineFound

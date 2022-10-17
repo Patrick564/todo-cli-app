@@ -35,7 +35,7 @@ func TestList(t *testing.T) {
 			name: "all.md file with 3 tasks",
 			flag: "all",
 			file: fstest.MapFS{
-				"all.md": {Data: []byte("1. fake task example\n5. second fake task\n13. two digits id fake task")},
+				"all.md": {Data: []byte("1: fake task example\n5: second fake task\n13: two digits id fake task")},
 			},
 			want: []cmdutil.Task{
 				{Id: "1", Content: "fake task example"},
@@ -47,8 +47,8 @@ func TestList(t *testing.T) {
 			name: "all.md and completed.md file with 2 tasks",
 			flag: "completed",
 			file: fstest.MapFS{
-				"all.md":       {Data: []byte("15. fake task")},
-				"completed.md": {Data: []byte("12. completed fake task\n28. second completed fake task")},
+				"all.md":       {Data: []byte("15: fake task")},
+				"completed.md": {Data: []byte("12: completed fake task\n28: second completed fake task")},
 			},
 			want: []cmdutil.Task{
 				{Id: "12", Content: "completed fake task"},
