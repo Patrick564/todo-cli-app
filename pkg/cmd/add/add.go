@@ -1,9 +1,12 @@
 package add
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"strings"
 
+	"github.com/Patrick564/todo-cli-app/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 
@@ -18,30 +21,39 @@ func NewCmdAdd() *cobra.Command {
 		Example: `  todo`,
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) > 0 {
-				err := writeTask(args[0])
-				if err != nil {
-					return err
-				}
-
-				fmt.Printf("Added task: %s\n", args[0])
+			if len(args) < 1 {
+				return errors.New("insufficient arguments")
 			}
 
-			return nil
+			return runAdd(args)
 		},
 	}
 
 	return cmd
 }
 
-func writeTask(s string) error {
-	task := fmt.Sprintf("\n%s", s)
+func runAdd(args []string) error {
+	content := strings.Join(args, " ")
+	task := cmdutil.New(content)
 
-	f, err := os.OpenFile("gtask_backup/pending.md", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+	err := writeTask(*task)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Added task: %s\n", task.ToString())
+
+	return nil
+}
+
+func writeTask(t cmdutil.Task) error {
+	f, err := os.OpenFile(cmdutil.TasksAddFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
+
+	task := fmt.Sprintf("%s\n", t.ToString())
 
 	_, err = f.Write([]byte(task))
 	if err != nil {

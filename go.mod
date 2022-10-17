@@ -2,7 +2,10 @@ module github.com/Patrick564/todo-cli-app
 
 go 1.19
 
-require github.com/spf13/cobra v1.5.0
+require (
+	github.com/google/uuid v1.3.0
+	github.com/spf13/cobra v1.5.0
+)
 
 require (
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect

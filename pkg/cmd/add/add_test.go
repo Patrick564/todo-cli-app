@@ -6,6 +6,9 @@ import (
 	"testing/fstest"
 )
 
+// Disclaimer/TODO: I really not found a method or interface to test
+// how to write or create a file, after finish the whole project re start
+// this test.
 func TestAdd(t *testing.T) {
 	cases := []struct {
 		name string

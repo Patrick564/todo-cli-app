@@ -1,16 +1,15 @@
 package list
 
 import (
+	"bufio"
 	"fmt"
 	"io/fs"
 	"os"
+	"strings"
 
 	"github.com/Patrick564/todo-cli-app/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
-
-// Correct to uppercase
-const tasksDir = "gtask_backup"
 
 type ListOptions struct {
 	All       bool
@@ -57,10 +56,10 @@ func NewCmdList() *cobra.Command {
 }
 
 func runList(flag string) error {
-	tasks, err := readTasksFromFS(os.DirFS(tasksDir), flag)
+	tasks, err := readTasksFromFS(os.DirFS(cmdutil.TasksDir), flag)
 	if err != nil {
 		if err == cmdutil.ErrFileEmpty {
-			fmt.Printf("No %s tasks found.\n", flag)
+			fmt.Println("No tasks found.")
 			return nil
 		}
 
@@ -88,17 +87,29 @@ func readTasksFromFS(fileSystem fs.FS, flag string) ([]cmdutil.Task, error) {
 		return nil, err
 	}
 
-	entry, err := cmdutil.GetFile(dir, flag)
+	f, err := getFile(dir, flag)
 	if err != nil {
 		return nil, err
 	}
 
-	task, err := getTasks(fileSystem, entry)
+	t, err := getTasks(fileSystem, f)
 	if err != nil {
 		return nil, err
 	}
 
-	return task, nil
+	return t, nil
+}
+
+func getFile(dir []fs.DirEntry, flag string) (fs.DirEntry, error) {
+	cmdFlag := fmt.Sprintf("%s.md", flag)
+
+	for _, d := range dir {
+		if cmdFlag == d.Name() {
+			return d, nil
+		}
+	}
+
+	return nil, cmdutil.ErrFileNotFound
 }
 
 func getTasks(fileSystem fs.FS, f fs.DirEntry) ([]cmdutil.Task, error) {
@@ -108,5 +119,27 @@ func getTasks(fileSystem fs.FS, f fs.DirEntry) ([]cmdutil.Task, error) {
 	}
 	defer postFile.Close()
 
-	return cmdutil.GetFileContent(postFile)
+	return getFileContent(postFile)
+}
+
+func getFileContent(postFile fs.File) ([]cmdutil.Task, error) {
+	scanner := bufio.NewScanner(postFile)
+
+	var tasks []cmdutil.Task
+
+	for scanner.Scan() {
+		task := strings.Split(scanner.Text(), ". ")
+
+		if len(task) == 0 {
+			return nil, cmdutil.ErrEmptyLineFound
+		}
+
+		tasks = append(tasks, cmdutil.Task{Id: task[0], Content: task[1]})
+	}
+
+	if tasks == nil {
+		return nil, cmdutil.ErrFileEmpty
+	}
+
+	return tasks, nil
 }
