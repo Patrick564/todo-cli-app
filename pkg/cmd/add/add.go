@@ -36,7 +36,7 @@ func runAdd(args []string) error {
 	content := strings.Join(args, " ")
 	task := cmdutil.New(content)
 
-	err := writeTask(*task)
+	err := writeTask(task)
 	if err != nil {
 		return err
 	}

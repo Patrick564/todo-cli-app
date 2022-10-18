@@ -22,6 +22,7 @@ func NewCmdRoot() *cobra.Command {
 		`,
 	}
 
+	// Flags
 	cmd.Flags().Bool("version", false, "Show gtask version")
 	cmd.SetHelpFunc(func(c *cobra.Command, args []string) {
 		rootHelp(os.Stdout, c)

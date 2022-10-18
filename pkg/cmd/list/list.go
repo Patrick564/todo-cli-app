@@ -76,25 +76,24 @@ func runList(opts ListOptions) error {
 	return listTasks(tasks, opts.Verbose)
 }
 
-func listTasks(tasks []cmdutil.Task, v bool) error {
+func listTasks(tasks []*cmdutil.Task, v bool) error {
 	format := func(t cmdutil.Task, v bool) string {
 		if v {
-			return fmt.Sprintf("%s: %s", t.Id, t.Content)
+			return t.ToString()
 		}
 
-		return fmt.Sprint(t.Content)
+		return t.Content
 	}
 
 	fmt.Println()
-
 	for _, t := range tasks {
-		fmt.Println(format(t, v))
+		fmt.Println(format(*t, v))
 	}
 
 	return nil
 }
 
-func readTasksFromFS(fileSystem fs.FS, flag string) ([]cmdutil.Task, error) {
+func readTasksFromFS(fileSystem fs.FS, flag string) ([]*cmdutil.Task, error) {
 	dir, err := fs.ReadDir(fileSystem, ".")
 	if err != nil {
 		return nil, err
@@ -125,7 +124,7 @@ func getFile(dir []fs.DirEntry, flag string) (fs.DirEntry, error) {
 	return nil, cmdutil.ErrFileNotFound
 }
 
-func getTasks(fileSystem fs.FS, f fs.DirEntry) ([]cmdutil.Task, error) {
+func getTasks(fileSystem fs.FS, f fs.DirEntry) ([]*cmdutil.Task, error) {
 	postFile, err := fileSystem.Open(f.Name())
 	if err != nil {
 		return nil, err
@@ -135,19 +134,20 @@ func getTasks(fileSystem fs.FS, f fs.DirEntry) ([]cmdutil.Task, error) {
 	return getFileContent(postFile)
 }
 
-func getFileContent(postFile fs.File) ([]cmdutil.Task, error) {
+func getFileContent(postFile fs.File) ([]*cmdutil.Task, error) {
 	scanner := bufio.NewScanner(postFile)
 
-	var tasks []cmdutil.Task
+	var tasks []*cmdutil.Task
 
 	for scanner.Scan() {
-		task := strings.Split(scanner.Text(), ": ")
+		line := strings.Split(scanner.Text(), ": ")
 
-		if len(task) == 0 {
-			return nil, cmdutil.ErrEmptyLineFound
+		t, err := cmdutil.NewTaskFromArray(line)
+		if err != nil {
+			return nil, err
 		}
 
-		tasks = append(tasks, cmdutil.Task{Id: task[0], Content: task[1]})
+		tasks = append(tasks, t)
 	}
 
 	if tasks == nil {

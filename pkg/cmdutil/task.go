@@ -20,8 +20,17 @@ func (t *Task) ToString() string {
 	return fmt.Sprintf("%s: %s", t.Id, t.Content)
 }
 
-func New(content string) *Task {
+// Rename to NewTask
+func New(content string) Task {
 	id := uuid.New()
 
-	return &Task{Id: id.String(), Content: content}
+	return Task{Id: id.String(), Content: content}
+}
+
+func NewTaskFromArray(line []string) (*Task, error) {
+	if len(line) == 0 {
+		return nil, ErrEmptyLineFound
+	}
+
+	return &Task{Id: line[0], Content: line[1]}, nil
 }
