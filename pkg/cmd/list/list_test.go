@@ -59,7 +59,7 @@ func TestList(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got, err := readTasksFromFS(c.file, c.flag)
+			got, err := cmdutil.ReadFromFS(c.file, c.flag, cmdutil.ReadFile)
 			if err != nil {
 				assertError(t, err, c.wantErr)
 			}

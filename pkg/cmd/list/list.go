@@ -1,12 +1,9 @@
 package list
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
-	"io/fs"
 	"os"
-	"strings"
 
 	"github.com/Patrick564/todo-cli-app/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -59,7 +56,8 @@ func NewCmdList() *cobra.Command {
 }
 
 func runList(opts ListOptions) error {
-	tasks, err := readTasksFromFS(os.DirFS(cmdutil.TasksDir), opts.Name)
+	dirFS := os.DirFS(cmdutil.TasksDir)
+	tasks, err := cmdutil.ReadFromFS(dirFS, opts.Name, cmdutil.ReadFile)
 	if err != nil {
 		if errors.Is(err, cmdutil.ErrFileEmpty) || errors.Is(err, cmdutil.ErrFileNotFound) {
 			fmt.Println("No tasks found, create new with 'gtask add <...>'.")
@@ -87,68 +85,4 @@ func listTasks(tasks []*cmdutil.Task, v bool) error {
 	}
 
 	return nil
-}
-
-func readTasksFromFS(fileSystem fs.FS, flag string) ([]*cmdutil.Task, error) {
-	dir, err := fs.ReadDir(fileSystem, ".")
-	if err != nil {
-		return nil, err
-	}
-
-	f, err := getFile(dir, flag)
-	if err != nil {
-		return nil, err
-	}
-
-	t, err := getTasks(fileSystem, f)
-	if err != nil {
-		return nil, err
-	}
-
-	return t, nil
-}
-
-func getFile(dir []fs.DirEntry, flag string) (fs.DirEntry, error) {
-	cmdFlag := fmt.Sprintf("%s.md", flag)
-
-	for _, d := range dir {
-		if cmdFlag == d.Name() {
-			return d, nil
-		}
-	}
-
-	return nil, cmdutil.ErrFileNotFound
-}
-
-func getTasks(fileSystem fs.FS, f fs.DirEntry) ([]*cmdutil.Task, error) {
-	postFile, err := fileSystem.Open(f.Name())
-	if err != nil {
-		return nil, err
-	}
-	defer postFile.Close()
-
-	return getFileContent(postFile)
-}
-
-func getFileContent(postFile fs.File) ([]*cmdutil.Task, error) {
-	scanner := bufio.NewScanner(postFile)
-
-	var tasks []*cmdutil.Task
-
-	for scanner.Scan() {
-		line := strings.Split(scanner.Text(), ": ")
-
-		t, err := cmdutil.NewTaskFromArray(line)
-		if err != nil {
-			return nil, err
-		}
-
-		tasks = append(tasks, t)
-	}
-
-	if tasks == nil {
-		return nil, cmdutil.ErrFileEmpty
-	}
-
-	return tasks, nil
 }
