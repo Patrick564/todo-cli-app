@@ -2,6 +2,7 @@ package list
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -60,13 +61,8 @@ func NewCmdList() *cobra.Command {
 func runList(opts ListOptions) error {
 	tasks, err := readTasksFromFS(os.DirFS(cmdutil.TasksDir), opts.Name)
 	if err != nil {
-		if err == cmdutil.ErrFileEmpty {
-			fmt.Println("No tasks found.")
-			return nil
-		}
-
-		if err == cmdutil.ErrFileNotFound {
-			fmt.Printf("File for %s tasks not found.\n", opts.Name)
+		if errors.Is(err, cmdutil.ErrFileEmpty) || errors.Is(err, cmdutil.ErrFileNotFound) {
+			fmt.Println("No tasks found, create new with 'gtask add <...>'.")
 			return nil
 		}
 

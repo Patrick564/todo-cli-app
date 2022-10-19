@@ -7,6 +7,7 @@ import (
 	listCmd "github.com/Patrick564/todo-cli-app/pkg/cmd/list"
 	removeCmd "github.com/Patrick564/todo-cli-app/pkg/cmd/remove"
 	versionCmd "github.com/Patrick564/todo-cli-app/pkg/cmd/version"
+	"github.com/Patrick564/todo-cli-app/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 
@@ -20,6 +21,10 @@ func NewCmdRoot() *cobra.Command {
   $ gtask add -f your_task
   $ gtask remove id_task
 		`,
+
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			return cmdutil.CheckTasksDir()
+		},
 	}
 
 	// Flags

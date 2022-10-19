@@ -7,8 +7,10 @@ import (
 )
 
 const (
-	TasksDir     = "gtask_backup"
-	TasksAddFile = "gtask_backup/all.md"
+	TasksDir           string = "gtask_backup"
+	TasksAddFile       string = "gtask_backup/all.md"
+	TasksPendingFile   string = "gtask_backup/pending.md"
+	TasksCompletedFile string = "gtask_backup/completed.md"
 )
 
 type Task struct {
@@ -20,8 +22,7 @@ func (t *Task) ToString() string {
 	return fmt.Sprintf("%s: %s", t.Id, t.Content)
 }
 
-// Rename to NewTask
-func New(content string) Task {
+func NewTask(content string) Task {
 	id := uuid.New()
 
 	return Task{Id: id.String(), Content: content}

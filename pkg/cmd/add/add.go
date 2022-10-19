@@ -34,7 +34,7 @@ func NewCmdAdd() *cobra.Command {
 
 func runAdd(args []string) error {
 	content := strings.Join(args, " ")
-	task := cmdutil.New(content)
+	task := cmdutil.NewTask(content)
 
 	err := writeTask(task)
 	if err != nil {
