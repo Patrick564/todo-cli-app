@@ -57,7 +57,7 @@ func NewCmdList() *cobra.Command {
 
 func runList(opts ListOptions) error {
 	dirFS := os.DirFS(cmdutil.TasksDir)
-	tasks, err := cmdutil.ReadFromFS(dirFS, opts.Name, cmdutil.ReadFile)
+	t, err := cmdutil.GetTaskList(dirFS, opts.Name)
 	if err != nil {
 		if errors.Is(err, cmdutil.ErrFileEmpty) || errors.Is(err, cmdutil.ErrFileNotFound) {
 			fmt.Println("No tasks found, create new with 'gtask add <...>'.")
@@ -67,7 +67,7 @@ func runList(opts ListOptions) error {
 		return err
 	}
 
-	return listTasks(tasks, opts.Verbose)
+	return listTasks(t, opts.Verbose)
 }
 
 func listTasks(tasks []*cmdutil.Task, v bool) error {

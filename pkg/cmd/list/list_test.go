@@ -1,6 +1,7 @@
 package list
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"testing/fstest"
@@ -11,26 +12,11 @@ import (
 // TODO: add table test for list all, completed, and pending
 func TestList(t *testing.T) {
 	cases := []struct {
-		name    string
-		flag    string
-		file    fstest.MapFS
-		want    []*cmdutil.Task
-		wantErr error
+		name string
+		flag string
+		file fstest.MapFS
+		want []*cmdutil.Task
 	}{
-		{
-			name:    "empty files dir",
-			flag:    "all",
-			file:    fstest.MapFS{},
-			want:    nil,
-			wantErr: cmdutil.ErrFileNotFound,
-		},
-		{
-			name:    "empty tasks file",
-			flag:    "all",
-			file:    fstest.MapFS{"all.md": {Data: []byte("")}},
-			want:    nil,
-			wantErr: cmdutil.ErrFileEmpty,
-		},
 		{
 			name: "all.md file with 3 tasks",
 			flag: "all",
@@ -59,21 +45,63 @@ func TestList(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			got, err := cmdutil.ReadFromFS(c.file, c.flag, cmdutil.ReadFile)
-			if err != nil {
-				assertError(t, err, c.wantErr)
-			}
+			got, err := cmdutil.GetTaskList(c.file, c.flag)
 
+			assertNoError(t, err)
 			assertDeepEqual(t, got, c.want)
+		})
+	}
+}
+
+func TestListWithError(t *testing.T) {
+	cases := []struct {
+		name    string
+		flag    string
+		file    fstest.MapFS
+		want    []*cmdutil.Task
+		wantErr error
+	}{
+		{
+			name:    "empty files dir",
+			flag:    "all",
+			file:    fstest.MapFS{},
+			wantErr: cmdutil.ErrFileNotFound,
+		},
+		{
+			name:    "empty tasks file",
+			flag:    "all",
+			file:    fstest.MapFS{"all.md": {Data: []byte("")}},
+			wantErr: cmdutil.ErrFileEmpty,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			_, err := cmdutil.GetTaskList(c.file, c.flag)
+
+			assertError(t, err, c.wantErr)
 		})
 	}
 }
 
 func assertError(t testing.TB, got, want error) {
 	t.Helper()
+	fmt.Println("aaaaaaa assert error")
 
+	if got == nil {
+		t.Fatal("didn't get an error but wanted one")
+	}
+	fmt.Printf("%+v, %+v assert", got, want)
 	if got != want {
 		t.Errorf("want error '%+v' but got '%+v'", want, got)
+	}
+}
+
+func assertNoError(t testing.TB, got error) {
+	t.Helper()
+
+	if got != nil {
+		t.Fatal("got an error but didn't want one")
 	}
 }
 
