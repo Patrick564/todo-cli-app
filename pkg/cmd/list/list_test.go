@@ -1,7 +1,6 @@
 package list
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 	"testing/fstest"
@@ -9,7 +8,6 @@ import (
 	"github.com/Patrick564/todo-cli-app/pkg/cmdutil"
 )
 
-// TODO: add table test for list all, completed, and pending
 func TestList(t *testing.T) {
 	cases := []struct {
 		name string
@@ -86,12 +84,11 @@ func TestListWithError(t *testing.T) {
 
 func assertError(t testing.TB, got, want error) {
 	t.Helper()
-	fmt.Println("aaaaaaa assert error")
 
 	if got == nil {
 		t.Fatal("didn't get an error but wanted one")
 	}
-	fmt.Printf("%+v, %+v assert", got, want)
+
 	if got != want {
 		t.Errorf("want error '%+v' but got '%+v'", want, got)
 	}

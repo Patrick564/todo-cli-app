@@ -7,6 +7,13 @@ import (
 	"strings"
 )
 
+const taskRawSep string = ": "
+
+// type fileReader interface {
+// 	func(fs.FS) ([]*Task, error)
+// 	readFileById(postFile fs.File, id string) error
+// }
+
 func CheckTasksDir() error {
 	if !exists(TasksDir) {
 		err := os.Mkdir(TasksDir, 0755)
@@ -27,55 +34,62 @@ func exists(file string) bool {
 }
 
 func GetTaskList(fileSystem fs.FS, filename string) ([]*Task, error) {
-	file, err := ReadFromFS(fileSystem, filename)
-	if err != nil {
-		return nil, err
-	}
-
-	return ReadFile(file)
-}
-
-func GetTaskById(fileSystem fs.FS, name string, id string) (*Task, error) {
-	_, err := ReadFromFS(fileSystem, name)
-	if err != nil {
-		return nil, err
-	}
-
-	return nil, nil
-}
-
-func ReadFromFS(fileSystem fs.FS, filename string) (fs.File, error) {
 	dir, err := fs.ReadDir(fileSystem, ".")
 	if err != nil {
 		return nil, err
 	}
 
-	return getFile(fileSystem, dir, filename)
-}
-
-func getFile(fileSystem fs.FS, dir []fs.DirEntry, filename string) (fs.File, error) {
 	fileName := strings.Join([]string{filename, "md"}, ".")
+	var entry fs.DirEntry
 
 	for _, d := range dir {
 		if fileName == d.Name() {
-			return openFile(fileSystem, d)
+			entry = d
 		}
 	}
 
-	return nil, ErrFileNotFound
-}
+	if entry == nil {
+		return nil, ErrFileNotFound
+	}
 
-func openFile(fileSystem fs.FS, f fs.DirEntry) (fs.File, error) {
-	postFile, err := fileSystem.Open(f.Name())
+	postFile, err := fileSystem.Open(entry.Name())
 	if err != nil {
 		return nil, err
 	}
 	defer postFile.Close()
 
-	return postFile, nil
+	return readFile(postFile)
 }
 
-func ReadFile(postFile fs.File) ([]*Task, error) {
+func RemoveTask(fileSystem fs.FS, filename string, id string) error {
+	dir, err := fs.ReadDir(fileSystem, ".")
+	if err != nil {
+		return err
+	}
+
+	fn := strings.Join([]string{filename, "md"}, ".")
+	var entry fs.DirEntry
+
+	for _, d := range dir {
+		if fn == d.Name() {
+			entry = d
+		}
+	}
+
+	if entry == nil {
+		return ErrFileNotFound
+	}
+
+	postFile, err := fileSystem.Open(entry.Name())
+	if err != nil {
+		return err
+	}
+	defer postFile.Close()
+
+	return readFileById(postFile, id)
+}
+
+func readFile(postFile fs.File) ([]*Task, error) {
 	scanner := bufio.NewScanner(postFile)
 
 	var tasks []*Task
@@ -96,4 +110,30 @@ func ReadFile(postFile fs.File) ([]*Task, error) {
 	}
 
 	return tasks, nil
+}
+
+func readFileById(postFile fs.File, id string) error {
+	temp, err := os.CreateTemp("gtask_backup", "gtask_temp")
+	if err != nil {
+		return err
+	}
+	defer temp.Close()
+
+	scanner := bufio.NewScanner(postFile)
+	writer := bufio.NewWriter(temp)
+
+	for scanner.Scan() {
+		line := strings.Split(scanner.Text(), taskRawSep)
+		if line[0] == id {
+			continue
+		}
+		writer.Write([]byte(scanner.Text()))
+	}
+
+	err = os.Rename(temp.Name(), "gtask_backup/all.md")
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
