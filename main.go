@@ -6,13 +6,6 @@ import (
 	"github.com/Patrick564/todo-cli-app/pkg/cmd/root"
 )
 
-// type exitCode int
-
-// const (
-// 	exitOK    exitCode = 0
-// 	exitError exitCode = 1
-// )
-
 func main() {
 	rootCmd := root.NewCmdRoot()
 	code := 0

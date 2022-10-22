@@ -14,7 +14,7 @@ type ListOptions struct {
 	Completed bool
 	Pending   bool
 	Verbose   bool
-	Name      string
+	File      string
 }
 
 func NewCmdList() *cobra.Command {
@@ -32,15 +32,15 @@ func NewCmdList() *cobra.Command {
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if opts.Completed {
-				opts.Name = "completed"
+				opts.File = "completed"
 			}
 
 			if opts.Pending {
-				opts.Name = "pending"
+				opts.File = "pending"
 			}
 
-			if opts.All || opts.Name == "" {
-				opts.Name = "all"
+			if opts.All || opts.File == "" {
+				opts.File = "all"
 			}
 
 			return runList(opts)
@@ -56,8 +56,7 @@ func NewCmdList() *cobra.Command {
 }
 
 func runList(opts ListOptions) error {
-	dirFS := os.DirFS(cmdutil.TasksDir)
-	t, err := cmdutil.GetTaskList(dirFS, opts.Name)
+	tasks, err := cmdutil.GetTaskList(os.DirFS(cmdutil.TasksDir), opts.File)
 	if err != nil {
 		if errors.Is(err, cmdutil.ErrFileEmpty) || errors.Is(err, cmdutil.ErrFileNotFound) {
 			fmt.Println("No tasks found, create new with 'gtask add <...>'.")
@@ -67,7 +66,7 @@ func runList(opts ListOptions) error {
 		return err
 	}
 
-	return listTasks(t, opts.Verbose)
+	return listTasks(tasks, opts.Verbose)
 }
 
 func listTasks(tasks []*cmdutil.Task, v bool) error {

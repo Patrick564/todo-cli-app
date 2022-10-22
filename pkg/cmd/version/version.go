@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const version = "0.1.5"
+const version = "0.9.0"
 
 func NewCmdVersion(w io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
