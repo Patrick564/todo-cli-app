@@ -79,8 +79,11 @@ func listTasks(tasks []*cmdutil.Task, v bool) error {
 		return t.Content
 	}
 
-	fmt.Println()
-	for _, t := range tasks {
+	fmt.Println("All tasks: ")
+	for idx, t := range tasks {
+		if idx == 0 {
+			fmt.Println()
+		}
 		fmt.Println(format(*t, v))
 	}
 

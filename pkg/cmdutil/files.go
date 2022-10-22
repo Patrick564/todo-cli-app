@@ -2,12 +2,11 @@ package cmdutil
 
 import (
 	"bufio"
+	"fmt"
 	"io/fs"
 	"os"
 	"strings"
 )
-
-const taskRawSep string = ": "
 
 // type fileReader interface {
 // 	func(fs.FS) ([]*Task, error)
@@ -95,9 +94,7 @@ func readFile(postFile fs.File) ([]*Task, error) {
 	var tasks []*Task
 
 	for scanner.Scan() {
-		line := strings.Split(scanner.Text(), ": ")
-
-		t, err := NewTaskFromArray(line)
+		t, err := NewTaskFromLine(scanner.Text())
 		if err != nil {
 			return nil, err
 		}
@@ -113,24 +110,31 @@ func readFile(postFile fs.File) ([]*Task, error) {
 }
 
 func readFileById(postFile fs.File, id string) error {
-	temp, err := os.CreateTemp("gtask_backup", "gtask_temp")
+	temp, err := os.CreateTemp(TasksDir, TasksTempDir)
 	if err != nil {
 		return err
 	}
 	defer temp.Close()
 
 	scanner := bufio.NewScanner(postFile)
-	writer := bufio.NewWriter(temp)
-
 	for scanner.Scan() {
-		line := strings.Split(scanner.Text(), taskRawSep)
-		if line[0] == id {
-			continue
+		task, err := NewTaskFromLine(scanner.Text())
+		if err != nil {
+			return err
 		}
-		writer.Write([]byte(scanner.Text()))
+
+		if task.Id != id {
+			fmtTask := fmt.Sprintf("%s\n", task.ToString())
+			_, err = temp.Write([]byte(fmtTask))
+			if err != nil {
+				return err
+			}
+		}
+
+		continue
 	}
 
-	err = os.Rename(temp.Name(), "gtask_backup/all.md")
+	err = os.Rename(temp.Name(), TasksAddFile)
 	if err != nil {
 		return err
 	}

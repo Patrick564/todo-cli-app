@@ -19,7 +19,7 @@ func NewCmdRemove() *cobra.Command {
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
-				return runRemove()
+				return runRemove(args[0])
 			}
 
 			return nil
@@ -29,14 +29,13 @@ func NewCmdRemove() *cobra.Command {
 	return cmd
 }
 
-func runRemove() error {
-	dirFS := os.DirFS(cmdutil.TasksDir)
-	err := cmdutil.RemoveTask(dirFS, "all", "df6b13dd-e7d8-4d5e-80e6-9edaf5b0c64c")
+func runRemove(id string) error {
+	err := cmdutil.RemoveTask(os.DirFS(cmdutil.TasksDir), "all", id)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("correct delete")
+	fmt.Println("Task remove correctly.")
 
 	return nil
 }
