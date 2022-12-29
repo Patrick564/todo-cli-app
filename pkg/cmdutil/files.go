@@ -2,16 +2,31 @@ package cmdutil
 
 import (
 	"bufio"
+	"database/sql"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"strings"
 )
 
-// type fileReader interface {
-// 	func(fs.FS) ([]*Task, error)
-// 	readFileById(postFile fs.File, id string) error
-// }
+func CheckDatabaseDir(db *sql.DB, fileName string) error {
+	_, err := os.Stat(fileName)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			_, err = db.Exec("CREATE TABLE IF NOT EXISTS task (id INTEGER PRIMARY KEY AUTOINCREMENT, content TEXT NOT NULL, created DATETIME DEFAULT CURRENT_TIMESTAMP)")
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}
+
+		return err
+	}
+
+	return nil
+}
 
 func CheckTasksDir() error {
 	if !exists(TasksDir) {

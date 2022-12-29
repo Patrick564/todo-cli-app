@@ -30,7 +30,7 @@ func NewCmdList() *cobra.Command {
   $ gtask list pending
 		`,
 
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			if opts.Completed {
 				opts.File = "completed"
 			}

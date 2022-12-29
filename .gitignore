@@ -1,3 +1,5 @@
 /gtask_backup/*
 
 build/
+
+*.db
