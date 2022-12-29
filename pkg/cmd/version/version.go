@@ -2,19 +2,19 @@ package version
 
 import (
 	"fmt"
-	"io"
 
 	"github.com/spf13/cobra"
 )
 
-const version = "0.9.0"
+const Version string = "gtask version 1.1.0 (2022-12-29)\nFeel free to fork this project https://github.com/Patrick564/todo-cli-app"
 
-func NewCmdVersion(w io.Writer) *cobra.Command {
+func NewCmdVersion() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:    "version",
 		Hidden: true,
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Fprintf(w, "gtaks version %s\n", version)
+
+		Run: func(_ *cobra.Command, _ []string) {
+			fmt.Println(Version)
 		},
 	}
 

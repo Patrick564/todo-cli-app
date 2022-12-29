@@ -8,11 +8,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const bodyPad = 13
+const bodyPad int = 13
 
 type helpEntry struct {
 	Title string
 	Body  string
+}
+
+// Add spacing at start and between name and short description
+func formatCommand(command *cobra.Command) string {
+	pad := fmt.Sprintf("  %%-%ds", bodyPad)
+	template := fmt.Sprintf(pad, command.Name()+":")
+
+	return template + command.Short
 }
 
 // list, version, add, remove
@@ -35,12 +43,4 @@ func rootHelp(w io.Writer, command *cobra.Command) {
 		fmt.Fprintln(w, e.Title)
 		fmt.Fprintln(w, e.Body)
 	}
-}
-
-// Add spacing at start and between name and short description
-func formatCommand(command *cobra.Command) string {
-	pad := fmt.Sprintf("  %%-%ds", bodyPad)
-	template := fmt.Sprintf(pad, command.Name()+":")
-
-	return template + command.Short
 }
