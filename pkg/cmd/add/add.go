@@ -20,7 +20,7 @@ func NewCmdAdd() *cobra.Command {
 		Args:    cobra.MinimumNArgs(1),
 		Example: `  todo`,
 
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			if len(args) < 1 {
 				return errors.New("insufficient arguments")
 			}
