@@ -53,9 +53,7 @@ func AllTasks(db *sql.DB) ([]cmdutil.TaskSQL, error) {
 }
 
 func Connect() (*sql.DB, error) {
-	// If build flag is true the path is Dir(Executable) + taskDir
-	// If run the project the path is ./tasks
-	path := os.Getenv("PATH")
+	path := os.Getenv("FILE_PATH")
 
 	// Comprove if database file need schema creation
 	needSchm, err := cmdutil.NeedSchema(path, taskFile)

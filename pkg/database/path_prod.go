@@ -15,7 +15,12 @@ func init() {
 		log.Fatal(err)
 	}
 
-	err = os.Setenv("PATH", filepath.Join(filepath.Dir(path), taskDir))
+	err = os.Unsetenv("FILE_PATH")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = os.Setenv("FILE_PATH", filepath.Join(filepath.Dir(path), taskDir))
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -6,7 +6,7 @@ import (
 )
 
 func init() {
-	err := os.Setenv("PATH", "./tasks")
+	err := os.Setenv("FILE_PATH", "./tasks")
 	if err != nil {
 		log.Fatal(err)
 	}
