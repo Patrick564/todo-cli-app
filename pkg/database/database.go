@@ -23,6 +23,12 @@ func createSchema(db *sql.DB) error {
 	return nil
 }
 
+func AddTask(db *sql.DB, content string) error {
+	db.Exec("INSERT INTO task (content) VALUES ($1)", content)
+
+	return nil
+}
+
 func AllTasks(db *sql.DB) ([]cmdutil.TaskSQL, error) {
 	rows, err := db.Query("SELECT * FROM task")
 	if err != nil {
