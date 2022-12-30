@@ -1,11 +1,10 @@
 package list
 
 import (
-	"errors"
+	"database/sql"
 	"fmt"
-	"os"
+	"time"
 
-	"github.com/Patrick564/todo-cli-app/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +16,7 @@ type ListOptions struct {
 	File      string
 }
 
-func NewCmdList() *cobra.Command {
+func NewCmdList(db *sql.DB) *cobra.Command {
 	opts := ListOptions{}
 
 	cmd := &cobra.Command{
@@ -31,19 +30,29 @@ func NewCmdList() *cobra.Command {
 		`,
 
 		RunE: func(_ *cobra.Command, _ []string) error {
-			if opts.Completed {
-				opts.File = "completed"
+			db.Exec("insert into task (content) values ('example1')")
+			db.Exec("insert into task (content) values ('example2')")
+
+			rows, err := db.Query("select * from task")
+			if err != nil {
+				return err
+			}
+			defer rows.Close()
+
+			var a struct {
+				id      int
+				content string
+				date    time.Time
+			}
+			for rows.Next() {
+				err = rows.Scan(&a.id, &a.content, &a.date)
+				if err != nil {
+					return err
+				}
+				fmt.Println(a)
 			}
 
-			if opts.Pending {
-				opts.File = "pending"
-			}
-
-			if opts.All || opts.File == "" {
-				opts.File = "all"
-			}
-
-			return runList(opts)
+			return nil
 		},
 	}
 
@@ -53,38 +62,4 @@ func NewCmdList() *cobra.Command {
 	cmd.PersistentFlags().BoolVarP(&opts.Verbose, "verbose", "v", false, "List tasks with all information")
 
 	return cmd
-}
-
-func runList(opts ListOptions) error {
-	tasks, err := cmdutil.GetTaskList(os.DirFS(cmdutil.TasksDir), opts.File)
-	if err != nil {
-		if errors.Is(err, cmdutil.ErrFileEmpty) || errors.Is(err, cmdutil.ErrFileNotFound) {
-			fmt.Println("No tasks found, create new with 'gtask add <...>'.")
-			return nil
-		}
-
-		return err
-	}
-
-	return listTasks(tasks, opts.Verbose)
-}
-
-func listTasks(tasks []*cmdutil.Task, v bool) error {
-	format := func(t cmdutil.Task, v bool) string {
-		if v {
-			return t.ToString()
-		}
-
-		return t.Content
-	}
-
-	fmt.Println("All tasks: ")
-	for idx, t := range tasks {
-		if idx == 0 {
-			fmt.Println()
-		}
-		fmt.Println(format(*t, v))
-	}
-
-	return nil
 }

@@ -2,30 +2,45 @@ package cmdutil
 
 import (
 	"bufio"
-	"database/sql"
 	"errors"
 	"fmt"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
-func CheckDatabaseDir(db *sql.DB, fileName string) error {
-	_, err := os.Stat(fileName)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			_, err = db.Exec("CREATE TABLE IF NOT EXISTS task (id INTEGER PRIMARY KEY AUTOINCREMENT, content TEXT NOT NULL, created DATETIME DEFAULT CURRENT_TIMESTAMP)")
-			if err != nil {
-				return err
-			}
+const (
+	dirName  string = "/tasks"
+	fileName string = "/tasks.db"
+)
 
-			return nil
+type paths struct {
+	Dir  string
+	File string
+}
+
+// Initialize database schema.
+func NeedSchema(dir, fileName string) (bool, error) {
+	filePath := filepath.Join(dir, fileName)
+
+	_, err := os.Stat(filePath)
+	if errors.Is(err, os.ErrNotExist) {
+		err = os.MkdirAll(dir, 0755)
+		if err != nil {
+			return false, err
 		}
 
-		return err
+		file, err := os.Create(filePath)
+		if err != nil {
+			return false, err
+		}
+		file.Close()
+
+		return true, nil
 	}
 
-	return nil
+	return false, nil
 }
 
 func CheckTasksDir() error {

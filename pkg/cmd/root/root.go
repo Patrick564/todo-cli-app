@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewCmdRoot(_ *sql.DB) *cobra.Command {
+func NewCmdRoot(db *sql.DB) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "gtask <command> <subcommand>",
 		Short:   "CLI task manager made with Go and Sqlite",
@@ -32,7 +32,7 @@ func NewCmdRoot(_ *sql.DB) *cobra.Command {
 
 	// Child commands
 	cmd.AddCommand(versionCmd.NewCmdVersion())
-	cmd.AddCommand(listCmd.NewCmdList())
+	cmd.AddCommand(listCmd.NewCmdList(db))
 	cmd.AddCommand(addCmd.NewCmdAdd())
 	cmd.AddCommand(removeCmd.NewCmdRemove())
 
