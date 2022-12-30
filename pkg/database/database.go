@@ -20,18 +20,38 @@ func createSchema(db *sql.DB) error {
 		return err
 	}
 
-	_, err = db.Exec("insert into task (content) values ('Example task')")
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
+func AllTasks(db *sql.DB) ([]cmdutil.TaskSQL, error) {
+	rows, err := db.Query("SELECT * FROM task")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	tasks := make([]cmdutil.TaskSQL, 0)
+
+	for rows.Next() {
+		task := cmdutil.TaskSQL{}
+
+		err = rows.Scan(&task.Id, &task.Content, &task.Date)
+		if err != nil {
+			return nil, err
+		}
+
+		tasks = append(tasks, task)
+	}
+
+	return tasks, nil
+}
+
 func Connect() (*sql.DB, error) {
+	// If build flag is true the path is Dir(Executable) + taskDir
+	// If run the project the path is ./tasks
 	path := os.Getenv("PATH")
 
-	// Comprove if database file needSchm
+	// Comprove if database file need schema creation
 	needSchm, err := cmdutil.NeedSchema(path, taskFile)
 	if err != nil {
 		return nil, err

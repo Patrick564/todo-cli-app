@@ -3,9 +3,16 @@ package cmdutil
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 )
+
+type TaskSQL struct {
+	Id      int
+	Content string
+	Date    time.Time
+}
 
 const (
 	TasksDir           string = "gtask_backup"

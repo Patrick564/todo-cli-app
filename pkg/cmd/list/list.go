@@ -3,8 +3,8 @@ package list
 import (
 	"database/sql"
 	"fmt"
-	"time"
 
+	"github.com/Patrick564/todo-cli-app/pkg/database"
 	"github.com/spf13/cobra"
 )
 
@@ -30,26 +30,13 @@ func NewCmdList(db *sql.DB) *cobra.Command {
 		`,
 
 		RunE: func(_ *cobra.Command, _ []string) error {
-			db.Exec("insert into task (content) values ('example1')")
-			db.Exec("insert into task (content) values ('example2')")
-
-			rows, err := db.Query("select * from task")
+			tasks, err := database.AllTasks(db)
 			if err != nil {
 				return err
 			}
-			defer rows.Close()
 
-			var a struct {
-				id      int
-				content string
-				date    time.Time
-			}
-			for rows.Next() {
-				err = rows.Scan(&a.id, &a.content, &a.date)
-				if err != nil {
-					return err
-				}
-				fmt.Println(a)
+			for _, t := range tasks {
+				fmt.Println(t.Id, t.Content, t.Date)
 			}
 
 			return nil
