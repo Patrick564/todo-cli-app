@@ -1,14 +1,14 @@
 package remove
 
 import (
-	"fmt"
-	"os"
+	"database/sql"
+	"strconv"
 
-	"github.com/Patrick564/todo-cli-app/pkg/cmdutil"
+	"github.com/Patrick564/todo-cli-app/pkg/database"
 	"github.com/spf13/cobra"
 )
 
-func NewCmdRemove() *cobra.Command {
+func NewCmdRemove(db *sql.DB) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "remove [flags]",
 		Short: "Remove an existent task",
@@ -17,9 +17,14 @@ func NewCmdRemove() *cobra.Command {
 		Args:    cobra.ExactArgs(1),
 		Example: `  todo`,
 
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			if len(args) > 0 {
-				return runRemove(args[0])
+				i, err := strconv.Atoi(args[0])
+				if err != nil {
+					return err
+				}
+
+				return database.RemoveTask(db, i)
 			}
 
 			return nil
@@ -27,15 +32,4 @@ func NewCmdRemove() *cobra.Command {
 	}
 
 	return cmd
-}
-
-func runRemove(id string) error {
-	err := cmdutil.RemoveTask(os.DirFS(cmdutil.TasksDir), "all", id)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println("Task remove correctly.")
-
-	return nil
 }

@@ -29,6 +29,12 @@ func AddTask(db *sql.DB, content string) error {
 	return nil
 }
 
+func RemoveTask(db *sql.DB, id int) error {
+	db.Exec("DELETE FROM task WHERE id = $1", id)
+
+	return nil
+}
+
 func AllTasks(db *sql.DB) ([]cmdutil.TaskSQL, error) {
 	rows, err := db.Query("SELECT * FROM task")
 	if err != nil {

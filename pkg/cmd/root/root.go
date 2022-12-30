@@ -34,7 +34,7 @@ func NewCmdRoot(db *sql.DB) *cobra.Command {
 	cmd.AddCommand(versionCmd.NewCmdVersion())
 	cmd.AddCommand(listCmd.NewCmdList(db))
 	cmd.AddCommand(addCmd.NewCmdAdd(db))
-	cmd.AddCommand(removeCmd.NewCmdRemove())
+	cmd.AddCommand(removeCmd.NewCmdRemove(db))
 
 	return cmd
 }
