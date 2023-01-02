@@ -23,7 +23,7 @@ func NewCmdAdd(db *sql.DB) *cobra.Command {
 				return errors.New("insufficient arguments")
 			}
 
-			return database.AddTask(db, args[0])
+			return database.AddTask(db, args)
 		},
 	}
 
