@@ -6,8 +6,7 @@ import (
 	"path/filepath"
 )
 
-// Create if not exists database file.
-func NeedSchema(dir, fileName string) (bool, error) {
+func NeedsRestoreSchema(dir, fileName string) (bool, error) {
 	filePath := filepath.Join(dir, fileName)
 
 	_, err := os.Stat(filePath)

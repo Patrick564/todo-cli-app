@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 )
 
+const taskDir string = "tasks"
+
 func init() {
 	path, err := os.Executable()
 	if err != nil {

@@ -2,26 +2,39 @@ package database
 
 import (
 	"database/sql"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/Patrick564/todo-cli-app/pkg/cmdutil"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const (
-	taskDir  string = "tasks"
-	taskFile string = "tasks.db"
-)
+type Conn struct {
+	DB *sql.DB
+}
 
-func createSchema(db *sql.DB) error {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS task (id INTEGER PRIMARY KEY AUTOINCREMENT, content TEXT NOT NULL, complete INTEGER DEFAULT 0,created DATETIME DEFAULT CURRENT_TIMESTAMP)")
+func (c *Conn) RestoreSchema() error {
+	_, err := c.DB.Exec(`
+		CREATE TABLE IF NOT EXISTS task (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			content TEXT NOT NULL,
+			complete INTEGER DEFAULT 0,
+			created DATETIME DEFAULT CURRENT_TIMESTAMP
+		)
+	`)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func New(source string) (Conn, error) {
+	db, err := sql.Open(cmdutil.DriverName, source)
+	if err != nil {
+		return Conn{}, err
+	}
+
+	return Conn{DB: db}, nil
 }
 
 func AddTask(db *sql.DB, content []string) error {
@@ -65,25 +78,4 @@ func AllTasks(db *sql.DB) ([]cmdutil.Task, error) {
 	}
 
 	return tasks, nil
-}
-
-func Connect() (*sql.DB, error) {
-	path := os.Getenv("FILE_PATH")
-
-	// Comprove if database file need schema creation
-	needSchm, err := cmdutil.NeedSchema(path, taskFile)
-	if err != nil {
-		return nil, err
-	}
-
-	db, err := sql.Open("sqlite3", filepath.Join(path, taskFile))
-	if err != nil {
-		return nil, err
-	}
-
-	if needSchm {
-		createSchema(db)
-	}
-
-	return db, nil
 }
