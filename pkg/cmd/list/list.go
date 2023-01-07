@@ -15,7 +15,7 @@ func runList(db *sql.DB) error {
 		return err
 	}
 
-	fmt.Print("\nPending tasks:\n\n")
+	fmt.Print("Pending tasks:\n\n")
 	for _, t := range tasks {
 		if t.Complete == 0 {
 			fmt.Printf(
@@ -26,6 +26,7 @@ func runList(db *sql.DB) error {
 			)
 		}
 	}
+	fmt.Print("\n")
 
 	return nil
 }
