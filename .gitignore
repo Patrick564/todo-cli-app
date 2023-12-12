@@ -1,5 +1,7 @@
-/gtask_backup/*
-/tasks/
+/.idea/
+
+**/gtask_backup/*
+**/tasks/**
 
 build/
 
